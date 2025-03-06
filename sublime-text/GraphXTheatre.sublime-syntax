@@ -1,0 +1,61 @@
+%YAML 1.2
+---
+name: GraphXTheatre
+file_extensions:
+  - gt
+  # - graphxtheatre
+  # - theatre
+scope: source.gt
+
+contexts:
+  main:
+    - match: ^(@\w+)\n?([^\S\r\n]+\w+|[^\S\r\n]+)?
+      captures:
+        1: support.constant
+        2: invalid.illegal.no-whitespace
+    - match: '//.+'
+      scope: comment.line
+    - match: '{'
+      push: inside_object
+
+  inside_object:
+    - match: ':'
+      scope: constant.language
+    - match: '\['
+      scope: punctuation.bracket.square
+      push: cpp_reference
+    - match: '\('
+      scope: punctuation.bracket.round
+      push: raw_data
+    - match: '\<'
+      scope: punctuation.bracket.angle
+      push: theatre_reference
+    - match: \b(\w+)\b
+      scope: variable
+    - match: '}'
+      pop: true
+    - include: main
+
+  cpp_reference:
+    - match: '[\w\d]+'
+      scope: constant.character
+    - match: '\]'
+      pop: true
+    - match: .
+      scope: invalid.illegal
+
+  raw_data:
+    - match: '\)'
+      scope: punctuation.bracket.round
+      pop: true
+
+  raw_data_numeric:
+    - match: '([0-9]|\.|,)'
+      scope: constant.numeric
+    - match: '\w'
+    - match: '\)'
+      scope: punctuation.bracket.round
+      pop: true
+
+  theatre_reference:
+    - include: main
