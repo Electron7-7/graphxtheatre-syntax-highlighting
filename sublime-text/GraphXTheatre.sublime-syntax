@@ -13,6 +13,8 @@ contexts:
       captures:
         1: support.constant
         2: invalid.illegal.no-whitespace
+    - match: '[\w\d]+(?=\s)'
+      scope: storage.type.class
     - match: '//.+'
       scope: comment.line
     - match: '\('
@@ -23,8 +25,6 @@ contexts:
       push: inside_object
 
   inside_object:
-    - match: ':'
-      scope: punctuation.delimiter
     - match: '\['
       scope: punctuation.bracket.square
       push: cpp_reference
@@ -34,35 +34,46 @@ contexts:
     - match: '\<'
       scope: punctuation.bracket.angle
       push: theatre_reference
-    - match: \b(\w+)\b
-      scope: variable
+    - match: '^\s+'
+      push: variable_name
     - match: '}'
       scope: punctuation.bracket.curly
       pop: true
-    - include: main
+
+  variable_name:
+    - match: '[a-zA-Z_]+'
+      scope: variable.other.member
+    - match: ':'
+      scope: punctuation.delimiter
+    - match: '\s'
+      pop: true
 
   cpp_reference:
     - match: '[\w\d]+'
-      scope: punctuation.bracket.square
+      scope: constant.other.class
     - match: '\]'
       pop: true
     - match: .
       scope: invalid.illegal
 
   raw_data:
-    # - match: '(((?<![^\W\(,]\s)((-?)\b([0-9]+(\.?))+\b)((,)(\s+)?)?)|((?<=[\(])(\w?+\d?+\s?+)+))+'
-    # - match: '(((?<![^\W\(,]\s)(-)?\b(\d+)(\.)?\b(,)?(\s+)?)|((?<=[\(])(\w?+\d?+\s?+)+))+'
-    # - match: '([^\sA-Za-z_:;-]\K((-?)(((\d+)(\.)?)+)(\,)?(?:\s+)?)+|((\w?+\d?+\s?+)+)+)'
+    - match: '([a-zA-Z])?(?(1)(.*(?=\)))|((?<![\w_:;"\/\\])(-)?([0-9]+)(\.?)((,)?(?(8)\s+|((?:[^\S\d\)]?)+(?:[a-zA-Z_\.]?)+)))))'
       captures:
-        3: punctuation.separator.dash
-        4: constant.numeric
-        7: punctuation.delimiter.decimal.period
+        1: string.quoted
+        2: string.quoted
+        4: punctuation.separator.dash
+        5: constant.numeric
+        6: punctuation.delimiter.decimal.period
         8: punctuation.separator.comma
-        8: string.quoted
+        9: invalid.illegal.character
     - match: '\)'
       scope: punctuation.bracket.round
       pop: true
 
 
   theatre_reference:
-    - include: main
+    - match: '[\w\d]+'
+      scope: entity.name.class
+    - match: '>'
+      scope: punctuation.bracket.angle
+      pop: true
