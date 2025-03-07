@@ -15,6 +15,9 @@ contexts:
         2: invalid.illegal.no-whitespace
     - match: '//.+'
       scope: comment.line
+    - match: '\('
+      scope: punctuation.bracket.round
+      push: raw_data_string
     - match: '{'
       push: inside_object
 
@@ -24,9 +27,12 @@ contexts:
     - match: '\['
       scope: punctuation.bracket.square
       push: cpp_reference
-    - match: '\('
+    - match: '\((?=-?[0-9])'
       scope: punctuation.bracket.round
-      push: raw_data
+      push: raw_data_numeric
+    - match: '\((?=[\w\s])'
+      scope: punctuation.bracket.round
+      push: raw_data_string
     - match: '\<'
       scope: punctuation.bracket.angle
       push: theatre_reference
@@ -44,15 +50,21 @@ contexts:
     - match: .
       scope: invalid.illegal
 
-  raw_data:
+  raw_data_numeric:
+    - match: '(-?)(\d\.?+)(,)?(\s+)?'
+      captures:
+        1: punctuation.separator
+        2: constant.numeric
+        3: punctuation.separator.comma
     - match: '\)'
       scope: punctuation.bracket.round
       pop: true
+    - match: '[^\d\)-]'
+      scope: invalid.illegal.syntax
 
-  raw_data_numeric:
-    - match: '([0-9]|\.|,)'
-      scope: constant.numeric
-    - match: '\w'
+  raw_data_string:
+    - match: '[^)]'
+      scope: string.quoted.single
     - match: '\)'
       scope: punctuation.bracket.round
       pop: true
