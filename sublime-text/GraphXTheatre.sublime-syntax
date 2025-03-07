@@ -17,57 +17,52 @@ contexts:
       scope: comment.line
     - match: '\('
       scope: punctuation.bracket.round
-      push: raw_data_string
+      push: raw_data
     - match: '{'
+      scope: punctuation.bracket.curly
       push: inside_object
 
   inside_object:
     - match: ':'
-      scope: constant.language
+      scope: punctuation.delimiter
     - match: '\['
       scope: punctuation.bracket.square
       push: cpp_reference
-    - match: '\((?=-?[0-9])'
+    - match: '\('
       scope: punctuation.bracket.round
-      push: raw_data_numeric
-    - match: '\((?=[\w\s])'
-      scope: punctuation.bracket.round
-      push: raw_data_string
+      push: raw_data
     - match: '\<'
       scope: punctuation.bracket.angle
       push: theatre_reference
     - match: \b(\w+)\b
       scope: variable
     - match: '}'
+      scope: punctuation.bracket.curly
       pop: true
     - include: main
 
   cpp_reference:
     - match: '[\w\d]+'
-      scope: constant.character
+      scope: punctuation.bracket.square
     - match: '\]'
       pop: true
     - match: .
       scope: invalid.illegal
 
-  raw_data_numeric:
-    - match: '(-?)(\d\.?+)(,)?(\s+)?'
+  raw_data:
+    # - match: '(((?<![^\W\(,]\s)((-?)\b([0-9]+(\.?))+\b)((,)(\s+)?)?)|((?<=[\(])(\w?+\d?+\s?+)+))+'
+    # - match: '(((?<![^\W\(,]\s)(-)?\b(\d+)(\.)?\b(,)?(\s+)?)|((?<=[\(])(\w?+\d?+\s?+)+))+'
+    # - match: '([^\sA-Za-z_:;-]\K((-?)(((\d+)(\.)?)+)(\,)?(?:\s+)?)+|((\w?+\d?+\s?+)+)+)'
       captures:
-        1: punctuation.separator
-        2: constant.numeric
-        3: punctuation.separator.comma
+        3: punctuation.separator.dash
+        4: constant.numeric
+        7: punctuation.delimiter.decimal.period
+        8: punctuation.separator.comma
+        8: string.quoted
     - match: '\)'
       scope: punctuation.bracket.round
       pop: true
-    - match: '[^\d\)-]'
-      scope: invalid.illegal.syntax
 
-  raw_data_string:
-    - match: '[^)]'
-      scope: string.quoted.single
-    - match: '\)'
-      scope: punctuation.bracket.round
-      pop: true
 
   theatre_reference:
     - include: main
